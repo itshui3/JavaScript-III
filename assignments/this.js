@@ -88,3 +88,8 @@ const whatAboutBoxes = {
 }
 safewayBag.steal.call(whatAboutBoxes, 10);
 // console.log(safewayBag.steal.call(whatAboutBoxes, 5));
+
+const whatAboutBurgers = {
+  count: 0
+}
+
