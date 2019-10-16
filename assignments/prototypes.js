@@ -15,14 +15,29 @@
   * dimensions (These represent the character's size in the video game)
   * destroy() // prototype method that returns: `${this.name} was removed from the game.`
 */
-
+function GameObject(obj) {
+  this.createdAt = obj.createdAt;
+  this.name = obj.name;
+  this.dimensions = obj.dimensions;
+}
+GameObject.prototype.destroy = function() {
+  return `${this.name} was removed from the game.`;
+}
 /*
   === CharacterStats ===
   * healthPoints
   * takeDamage() // prototype method -> returns the string '<object name> took damage.'
   * should inherit destroy() from GameObject's prototype
 */
-
+function CharacterStats(obj) {
+  GameObject.call(this, obj);
+  this.healthPoints = obj.healthPoints;
+}
+CharacterStats.prototype = Object.create(GameObject.prototype);
+CharacterStats.prototype.takeDamage = function(amt) {
+  this.healthPoints -= amt;
+  return `${this.name} took ${amt} damage. ${this.healthPoints} HP left.`;
+}
 /*
   === Humanoid (Having an appearance or character resembling that of a human.) ===
   * team
@@ -32,7 +47,19 @@
   * should inherit destroy() from GameObject through CharacterStats
   * should inherit takeDamage() from CharacterStats
 */
- 
+
+function Humanoid(obj) {
+  CharacterStats.call(this, obj);
+  this.team = obj.team;
+  this.weapons = obj.weapons;
+  this.language = obj.language;
+}
+Humanoid.prototype = Object.create(CharacterStats.prototype);
+Humanoid.prototype.greet = function() {
+  return `${this.name} offers a greeting in ${this.language}`;
+}
+
+
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
   * Instances of Humanoid should have all of the same properties as CharacterStats and GameObject.
@@ -41,7 +68,7 @@
 
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
-/*
+
   const mage = new Humanoid({
     createdAt: new Date(),
     dimensions: {
@@ -100,11 +127,78 @@
   console.log(mage.weapons); // Staff of Shamalama
   console.log(archer.language); // Elvish
   console.log(archer.greet()); // Lilith offers a greeting in Elvish.
-  console.log(mage.takeDamage()); // Bruce took damage.
+  console.log(mage.takeDamage(5)); // Bruce took damage.
   console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
-*/
+
 
   // Stretch task: 
-  // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
+  // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function. 
+
+  function Villain(obj) {
+    Humanoid.call(this, obj);
+  }
+  Villain.prototype = Object.create(Humanoid.prototype);
+  Villain.prototype.slap = function(targetObj) {
+    if (targetObj.healthPoints < 2) {
+      targetObj.takeDamage(1);
+      targetObj.destroy();
+      return `${targetObj.name} was destroyed by ${this.name}`;
+    } else {
+      targetObj.healthPoints--;
+      return `${targetObj.name} was hit by ${this.name}, HP reduced to ${targetObj.healthPoints}`;
+    }
+  }
+
+
+  function Hero(obj) {
+    Humanoid.call(this, obj);
+  }
+  Hero.prototype = Object.create(Humanoid.prototype);
+  Hero.prototype.pray = function(targetObj) {
+    if (targetObj.healthPoints > 0) {
+      this.destroy.call(targetObj);
+      return `${targetObj.name} was destroyed by ${this.name} through the power of Faith!`;
+    }
+  }
+
+
+
   // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
   // * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+  const archNemesis = new Villain({
+    createdAt: new Date(),
+    dimensions: {
+      length: 2,
+      width: 2,
+      height: 2,
+    },
+    healthPoints: 15,
+    name: '???Sir Mustachio???',
+    team: 'The Round Table',
+    weapons: [
+      'Giant Sword',
+      'Shield',
+    ],
+    language: 'Common Tongue',
+  });
+
+  const boyo = new Hero({
+    createdAt: new Date(),
+    dimensions: {
+      length: 2,
+      width: 1,
+      height: 1,
+    },
+    healthPoints: 5,
+    name: 'Bruce',
+    team: 'Mage Guild',
+    weapons: [
+      'Staff of Shamalama',
+    ],
+    language: 'Common Tongue',
+  });
+
+  console.log(archNemesis.slap(boyo));
+  console.log(archNemesis.greet());
+  console.log(boyo.pray(archNemesis));
